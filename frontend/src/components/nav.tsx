@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useAuth } from "@/hooks/use-auth";
-import { Archive, Bell, BriefcaseBusiness, Building2, ChevronDown, GitMerge, LayoutDashboard, LogOut, MapPinned, Menu, Search, Settings, Sparkles, Users, X } from "lucide-react";
+import { Archive, Bell, BriefcaseBusiness, Building2, ChevronDown, GitMerge, LayoutDashboard, LogOut, Menu, Search, Settings, Users, X } from "lucide-react";
 import { useUnreadCount } from "@/hooks/use-notifications";
 import { useTelegramSyncProgress } from "@/hooks/use-telegram-sync";
 import { useState, useRef, useEffect } from "react";
