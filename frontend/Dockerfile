@@ -1,14 +1,14 @@
 # Stage 1: Install dependencies
 FROM node:20-alpine AS deps
 WORKDIR /app
-COPY package.json package-lock.json ./
+COPY frontend/package.json frontend/package-lock.json ./
 RUN npm ci
 
 # Stage 2: Build the application
 FROM node:20-alpine AS build
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
-COPY . .
+COPY frontend/ .
 
 ARG APP_VERSION=dev
 ENV APP_VERSION=${APP_VERSION}
