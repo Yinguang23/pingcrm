@@ -16,7 +16,7 @@ const EMPTY_SET = new Set<string>();
 
 type SortKey = "name" | "contacts" | "score" | "interactions" | "activity";
 
-type Organization = {
+type Company = {
   id: string;
   name: string;
   domain: string | null;
@@ -41,7 +41,7 @@ function MergeModal({
   onClose,
   isPending,
 }: {
-  orgs: Organization[];
+  orgs: Company[];
   onMerge: (targetId: string) => void;
   onClose: () => void;
   isPending: boolean;
@@ -56,16 +56,16 @@ function MergeModal({
       >
         <div className="flex items-center gap-2 mb-4">
           <GitMerge className="w-5 h-5 text-blue-600" />
-          <h2 className="text-lg font-bold text-gray-900 dark:text-gray-100">Merge Organizations</h2>
+          <h2 className="text-lg font-bold text-gray-900 dark:text-gray-100">Merge Companies</h2>
         </div>
 
         <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
-          All contacts from the selected organizations will be moved under one organization. Select which to keep:
+          All contacts from the selected companies will be moved under one company. Select which to keep:
         </p>
 
         <div className="mb-5">
           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-            Keep as target organization:
+            Keep as target company:
           </label>
           <div className="space-y-1.5 max-h-48 overflow-y-auto">
             {orgs.map((org) => (
@@ -170,7 +170,7 @@ function BulkActionBar({
 
 /* ── Main Content ── */
 
-function OrganizationsPageContent() {
+function CompaniesPageContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const queryClient = useQueryClient();
@@ -191,28 +191,28 @@ function OrganizationsPageContent() {
         else params.delete(key);
       }
       if (!("page" in updates)) params.delete("page");
-      router.replace(`/organizations?${params.toString()}`, { scroll: false });
+      router.replace(`/companies?${params.toString()}`, { scroll: false });
     },
     [searchParams, router]
   );
 
   const { data, isLoading, isError } = useQuery({
-    queryKey: ["organizations", searchFromUrl, page],
+    queryKey: ["companies", searchFromUrl, page],
     queryFn: async () => {
       const params: Record<string, string> = { page: String(page), page_size: "50" };
       if (searchFromUrl) params.search = searchFromUrl;
-      const { data } = await client.GET("/api/v1/organizations", {
+      const { data } = await client.GET("/api/v1/companies", {
         params: { query: params },
       });
-      return data as { data: Organization[]; meta: { total: number; page: number; page_size: number; total_pages: number } };
+      return data as { data: Company[]; meta: { total: number; page: number; page_size: number; total_pages: number } };
     },
   });
 
-  const organizations = data?.data ?? [];
+  const companies = data?.data ?? [];
   const meta = data?.meta;
 
-  const sortedOrganizations = useMemo(() => {
-    const sorted = [...organizations];
+  const sortedCompanies = useMemo(() => {
+    const sorted = [...companies];
     switch (sortKey) {
       case "name": sorted.sort((a, b) => a.name.localeCompare(b.name)); break;
       case "contacts": sorted.sort((a, b) => b.contact_count - a.contact_count); break;
@@ -225,30 +225,30 @@ function OrganizationsPageContent() {
       }); break;
     }
     return sorted;
-  }, [organizations, sortKey]);
+  }, [companies, sortKey]);
 
   const mergeOrgs = useMutation({
     mutationFn: async (body: { source_ids: string[]; target_id: string }) => {
-      const { data, error } = await client.POST("/api/v1/organizations/merge", { body });
+      const { data, error } = await client.POST("/api/v1/companies/merge", { body });
       if (error) throw new Error((error as { detail?: string })?.detail ?? "Merge failed");
       return data;
     },
     onSuccess: () => {
       setSelectedOrgIds(EMPTY_SET);
       setShowMergeModal(false);
-      void queryClient.invalidateQueries({ queryKey: ["organizations"] });
+      void queryClient.invalidateQueries({ queryKey: ["companies"] });
     },
   });
 
   const deleteOrg = useMutation({
     mutationFn: async (orgId: string) => {
-      const { error } = await client.DELETE("/api/v1/organizations/{org_id}", {
+      const { error } = await client.DELETE("/api/v1/companies/{org_id}", {
         params: { path: { org_id: orgId } },
       });
       if (error) throw new Error((error as { detail?: string })?.detail ?? "Delete failed");
     },
     onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: ["organizations"] });
+      void queryClient.invalidateQueries({ queryKey: ["companies"] });
     },
   });
 
@@ -262,43 +262,43 @@ function OrganizationsPageContent() {
   };
 
   const toggleSelectAll = () => {
-    if (selectedOrgIds.size === organizations.length) {
+    if (selectedOrgIds.size === companies.length) {
       setSelectedOrgIds(EMPTY_SET);
     } else {
-      setSelectedOrgIds(new Set(organizations.map((o) => o.id)));
+      setSelectedOrgIds(new Set(companies.map((o) => o.id)));
     }
   };
 
   const handleDeleteSelected = async () => {
     const count = selectedOrgIds.size;
     // eslint-disable-next-line no-alert -- native confirm before destructive bulk delete
-    if (!confirm(`Delete ${count} organization${count > 1 ? "s" : ""}? Contacts will be unlinked but not deleted.`)) return;
+    if (!confirm(`Delete ${count} company${count > 1 ? "s" : ""}? Contacts will be unlinked but not deleted.`)) return;
     await Promise.all(
       Array.from(selectedOrgIds).map((id) => deleteOrg.mutateAsync(id))
     );
     setSelectedOrgIds(EMPTY_SET);
   };
 
-  const handleDeleteSingle = (org: Organization) => {
+  const handleDeleteSingle = (org: Company) => {
     // eslint-disable-next-line no-alert -- native confirm before destructive delete
     if (!confirm(`Delete "${org.name}"? Contacts will be unlinked but not deleted.`)) return;
     deleteOrg.mutate(org.id);
     setSelectedOrgIds((prev) => { const next = new Set(prev); next.delete(org.id); return next; });
   };
 
-  const selectedMergeOrgs = organizations.filter((o) => selectedOrgIds.has(o.id));
-  const allSelected = selectedOrgIds.size === organizations.length && organizations.length > 0;
-  const indeterminate = selectedOrgIds.size > 0 && selectedOrgIds.size < organizations.length;
+  const selectedMergeOrgs = companies.filter((o) => selectedOrgIds.has(o.id));
+  const allSelected = selectedOrgIds.size === companies.length && companies.length > 0;
+  const indeterminate = selectedOrgIds.size > 0 && selectedOrgIds.size < companies.length;
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <div className="max-w-6xl mx-auto px-4 py-8">
         <div className="animate-in stagger-1 flex items-center justify-between mb-6 gap-4">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Organizations</h1>
+            <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Companies</h1>
             {meta && (
               <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
-                {meta.total} organization{meta.total !== 1 ? "s" : ""}
+                {meta.total} company{meta.total !== 1 ? "s" : ""}
               </p>
             )}
           </div>
@@ -316,7 +316,7 @@ function OrganizationsPageContent() {
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 dark:text-gray-500" />
             <input
               type="text"
-              placeholder="Search organizations..."
+              placeholder="Search companies..."
               value={searchInput}
               onChange={(e) => {
                 const value = e.target.value;
@@ -357,8 +357,8 @@ function OrganizationsPageContent() {
         <OrgListContent
           isLoading={isLoading}
           isError={isError}
-          organizations={organizations}
-          sortedOrganizations={sortedOrganizations}
+          companies={companies}
+          sortedCompanies={sortedCompanies}
           sortKey={sortKey}
           onSortChange={setSortKey}
           selectedOrgIds={selectedOrgIds}
@@ -386,6 +386,6 @@ function PageLoading() {
   return <div className="min-h-screen bg-stone-50 dark:bg-stone-950 flex items-center justify-center"><div className="animate-spin h-8 w-8 border-4 border-teal-500 border-t-transparent rounded-full" /></div>;
 }
 
-export default function OrganizationsPage() {
-  return <Suspense fallback={<PageLoading />}><OrganizationsPageContent /></Suspense>;
+export default function CompaniesPage() {
+  return <Suspense fallback={<PageLoading />}><CompaniesPageContent /></Suspense>;
 }
