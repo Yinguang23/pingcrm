@@ -15,14 +15,14 @@ RUN npm install -g @steipete/bird@0.8.0
 
 WORKDIR /app
 
-COPY requirements.txt .
+COPY backend/requirements.txt ./requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt
 
-COPY . .
+COPY backend/ .
 
 RUN mkdir -p /app/static/avatars
 
-COPY entrypoint.sh /entrypoint.sh
+COPY backend/entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 
 # Security: Run as non-root user
