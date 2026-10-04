@@ -34,7 +34,7 @@ function DashboardSubheading({
   overdueCount: number;
 }) {
   if (visiblePendingCount === 0 && overdueCount === 0) {
-    return <>Your networking overview</>;
+    return <>Your networking command center</>;
   }
   return (
     <>
@@ -82,7 +82,7 @@ export default function DashboardPage() {
       <div className="max-w-6xl mx-auto px-4 py-8">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-2xl font-display font-bold text-stone-900 dark:text-stone-100">Dashboard</h1>
+          <h1 className="text-2xl font-display font-bold text-stone-900 dark:text-stone-100">Your Day</h1>
           <p className="text-sm text-stone-500 dark:text-stone-400 mt-1">
             <DashboardSubheading
               pendingCount={allPending.length}
@@ -132,7 +132,7 @@ export default function DashboardPage() {
             <div className="text-center mb-6">
               <h2 className="text-lg font-display font-bold text-stone-900 dark:text-stone-100 mb-1">Connect your accounts to get started</h2>
               <p className="text-sm text-stone-500 dark:text-stone-400">
-                Ping will sync your contacts and interactions automatically.
+                Networking OS will sync your people and interactions automatically.
               </p>
             </div>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
@@ -181,6 +181,20 @@ export default function DashboardPage() {
           </div>
         )}
 
+        {/* Discovery entry point */}
+        {!isError && (
+          <div className="mb-8 rounded-2xl border border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900 p-6">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <p className="text-xs font-medium uppercase tracking-wide text-teal-600 dark:text-teal-400">Discover</p>
+                <h2 className="mt-1 text-lg font-display font-bold text-stone-900 dark:text-stone-100">Find your next five conversations</h2>
+                <p className="mt-1 text-sm text-stone-500 dark:text-stone-400">Search companies and people, then rank the best networking targets.</p>
+              </div>
+              <Link href="/discover" className="inline-flex shrink-0 items-center justify-center rounded-lg bg-teal-600 px-4 py-2 text-sm font-medium text-white hover:bg-teal-700">Start discovery</Link>
+            </div>
+          </div>
+        )}
+
         {/* Stat cards */}
         {!isEmpty && !isError && (
           <div className="animate-in stagger-1 grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
@@ -188,7 +202,7 @@ export default function DashboardPage() {
               icon={<Users className="w-4 h-4 text-teal-600 dark:text-teal-400" />}
               iconBg="bg-teal-50 dark:bg-teal-950"
               value={stats.total}
-              label="Total contacts"
+              label="People in network"
               isLoading={isLoading}
             />
             <StatCard
