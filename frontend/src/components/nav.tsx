@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useAuth } from "@/hooks/use-auth";
-import { Archive, Bell, Building2, ChevronDown, GitMerge, LayoutDashboard, LogOut, MapPinned, Menu, Settings, Sparkles, Users, X } from "lucide-react";
+import { Archive, Bell, BriefcaseBusiness, Building2, ChevronDown, GitMerge, LayoutDashboard, LogOut, MapPinned, Menu, Search, Settings, Sparkles, Users, X } from "lucide-react";
 import { useUnreadCount } from "@/hooks/use-notifications";
 import { useTelegramSyncProgress } from "@/hooks/use-telegram-sync";
 import { useState, useRef, useEffect } from "react";
@@ -12,20 +12,21 @@ import { ThemeToggle } from "@/components/theme-toggle";
 import { NavSearch } from "@/components/nav-search";
 
 const navLinks = [
-  { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
-  { href: "/suggestions", label: "Suggestions", icon: Sparkles },
+  { href: "/dashboard", label: "Home", icon: LayoutDashboard },
+  { href: "/discover", label: "Discover", icon: Search },
+  { href: "/organizations", label: "Companies", icon: Building2 },
   {
     href: "/contacts",
-    label: "Contacts",
+    label: "People",
     icon: Users,
     children: [
-      { href: "/contacts", label: "All Contacts", icon: Users },
+      { href: "/contacts", label: "All People", icon: Users },
       { href: "/contacts/archive", label: "Archive", icon: Archive },
       { href: "/identity", label: "Resolve Duplicates", icon: GitMerge },
     ],
   },
-  { href: "/map", label: "Map", icon: MapPinned },
-  { href: "/organizations", label: "Orgs", icon: Building2 },
+  { href: "/pipeline", label: "Pipeline", icon: GitMerge },
+  { href: "/applications", label: "Applications", icon: BriefcaseBusiness },
   { href: "/settings", label: "Settings", icon: Settings },
 ];
 
