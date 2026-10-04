@@ -9,11 +9,11 @@ import {
   SearchX,
 } from "lucide-react";
 import { ArchivedChip } from "@/components/archived-chip";
-import { ContactAvatar } from "@/components/contact-avatar";
+import { PersonAvatar } from "@/components/person-avatar";
 import { CompanyFavicon } from "@/components/company-favicon";
 import { formatDistanceToNow } from "date-fns";
-import { useContactsPage } from "./_hooks/use-contacts-page";
-import { ContactsToolbar } from "./_components/contacts-toolbar";
+import { usePeoplePage } from "./_hooks/use-people-page";
+import { PeopleToolbar } from "./_components/people-toolbar";
 import { BulkActionBar, Pagination } from "./_components/bulk-action-bar";
 import { ScoreNumberBadge, PriorityBadge, PlatformIcons, DaysAgo } from "./_components/row-badges";
 
@@ -25,7 +25,7 @@ import { ScoreNumberBadge, PriorityBadge, PlatformIcons, DaysAgo } from "./_comp
 // ---------------------------------------------------------------------------
 
 const sortColumns = [
-  { key: "name", label: "Contact" },
+  { key: "name", label: "Person" },
   { key: "company", label: "Company" },
   { key: "score", label: "Score" },
   { key: "priority", label: "Priority" },
@@ -50,7 +50,7 @@ const ARCHIVED_OPACITY_CLASS = "opacity-60";
 // Main Content
 // ---------------------------------------------------------------------------
 
-function ContactsPageContent() {
+function PeoplePageContent() {
   const {
     searchInput,
     setSearchInput,
@@ -72,7 +72,7 @@ function ContactsPageContent() {
     meta,
     isLoading,
     isError,
-    contacts,
+    people,
     activeFilterCount,
     stats,
     activeRelationships,
@@ -87,7 +87,7 @@ function ContactsPageContent() {
     mergeMutation,
     deleteMutation,
     isPending,
-  } = useContactsPage();
+  } = usePeoplePage();
 
   return (
     <div className="min-h-screen bg-stone-50 dark:bg-stone-950">
@@ -95,26 +95,26 @@ function ContactsPageContent() {
         {/* Header */}
         <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
           <div>
-            <h1 className="text-2xl font-display font-bold text-stone-900 dark:text-stone-100">Contacts</h1>
+            <h1 className="text-2xl font-display font-bold text-stone-900 dark:text-stone-100">People</h1>
             {stats && (
               <p className="text-sm text-stone-500 dark:text-stone-400 mt-0.5">
-                <span className="font-mono-data">{stats.total.toLocaleString()}</span> contacts
+                <span className="font-mono-data">{stats.total.toLocaleString()}</span> people
                 {" \u00B7 "}
                 <span className="font-mono-data">{activeRelationships}</span> active relationships
               </p>
             )}
           </div>
           <Link
-            href="/contacts/new"
+            href="/people/new"
             className="inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium rounded-lg bg-teal-600 text-white hover:bg-teal-700 transition-colors shadow-sm"
           >
-            <Plus className="w-4 h-4" /> Add Contact
+            <Plus className="w-4 h-4" /> Add Person
           </Link>
         </div>
 
         {/* Search + Filter bar */}
         <div className="animate-in stagger-1">
-        <ContactsToolbar
+        <PeopleToolbar
           searchInput={searchInput}
           setSearchInput={setSearchInput}
           debounceRef={debounceRef}
@@ -136,33 +136,33 @@ function ContactsPageContent() {
         </div>
 
         {/* Empty state */}
-        {!isLoading && !isError && contacts.length === 0 && (
+        {!isLoading && !isError && people.length === 0 && (
           <div className="bg-white dark:bg-stone-900 rounded-xl border border-stone-200 dark:border-stone-700 p-12 text-center mb-4">
             <div className="w-14 h-14 rounded-full bg-stone-100 dark:bg-stone-800 flex items-center justify-center mx-auto mb-4">
               <SearchX className="w-7 h-7 text-stone-400 dark:text-stone-500" />
             </div>
             <h3 className="text-base font-display font-bold text-stone-900 dark:text-stone-100 mb-1">
-              {ghostedFilter && activeFilterCount === 1 ? "No one's ghosting you" : "No contacts found"}
+              {ghostedFilter && activeFilterCount === 1 ? "No one's ghosting you" : "No people found"}
             </h3>
             <p className="text-sm text-stone-500 dark:text-stone-400 mb-5 max-w-sm mx-auto">
               {ghostedFilter && activeFilterCount === 1
                 ? "Nice. Everyone you've messaged has replied within the last 3."
-                : "Try adjusting your filters or search terms, or add a new contact."}
+                : "Try adjusting your filters or search terms, or add a new person."}
             </p>
             <div className="flex items-center justify-center gap-3">
               {activeFilterCount > 0 && (
                 <button
-                  onClick={() => router.replace("/contacts", { scroll: false })}
+                  onClick={() => router.replace("/people", { scroll: false })}
                   className="inline-flex items-center gap-1.5 px-3 py-2 text-sm font-medium rounded-lg border border-stone-200 dark:border-stone-700 text-stone-600 dark:text-stone-300 hover:bg-stone-50 dark:hover:bg-stone-800 transition-colors"
                 >
                   Clear filters
                 </button>
               )}
               <Link
-                href="/contacts/new"
+                href="/people/new"
                 className="inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium rounded-lg bg-teal-600 text-white hover:bg-teal-700 transition-colors shadow-sm"
               >
-                <Plus className="w-4 h-4" /> Add Contact
+                <Plus className="w-4 h-4" /> Add Person
               </Link>
             </div>
           </div>
@@ -192,12 +192,12 @@ function ContactsPageContent() {
 
         {isError && (
           <div className="text-center py-12 text-red-500">
-            Failed to load contacts. Is the backend running?
+            Failed to load people. Is the backend running?
           </div>
         )}
 
         {/* Table */}
-        {contacts.length > 0 && (
+        {people.length > 0 && (
           <div className="animate-in stagger-2 bg-white dark:bg-stone-900 rounded-xl border border-stone-200 dark:border-stone-700 overflow-hidden">
             {/* Header row — desktop only */}
             <div className="hidden lg:grid grid-cols-[40px_1fr_120px_70px_70px_60px_100px] gap-2 px-4 py-3 bg-stone-50 dark:bg-stone-800 border-b border-stone-200 dark:border-stone-700 items-center">
@@ -235,16 +235,16 @@ function ContactsPageContent() {
             </div>
 
             {/* Desktop rows */}
-            {contacts.map((contact) => {
+            {people.map((person) => {
               const name =
-                contact.full_name ??
-                ([contact.given_name, contact.family_name].filter(Boolean).join(" ") || "Unnamed");
-              const isSelected = selectedIds.has(contact.id);
-              const primaryEmail = contact.emails?.[0];
+                person.full_name ??
+                ([person.given_name, person.family_name].filter(Boolean).join(" ") || "Unnamed");
+              const isSelected = selectedIds.has(person.id);
+              const primaryEmail = person.emails?.[0];
 
               return (
                 <div
-                  key={contact.id}
+                  key={person.id}
                   className={`card-hover hidden lg:grid grid-cols-[40px_1fr_120px_70px_70px_60px_100px] gap-2 px-4 py-3 border-b border-stone-100 dark:border-stone-800 items-center transition-colors ${
                     isSelected ? "bg-teal-50 dark:bg-teal-950" : "hover:bg-stone-50/50 dark:hover:bg-stone-800/50"
                   }`}
@@ -253,37 +253,37 @@ function ContactsPageContent() {
                     <input
                       type="checkbox"
                       checked={isSelected}
-                      onChange={() => toggleSelect(contact.id)}
+                      onChange={() => toggleSelect(person.id)}
                       className="w-3.5 h-3.5 rounded border-stone-300 dark:border-stone-600 text-teal-600"
                       aria-label={`Select ${name}`}
                     />
                   </div>
 
-                  {/* Contact: avatar + name + email + platform icons */}
+                  {/* Person: avatar + name + email + platform icons */}
                   <div className="flex items-center gap-3 min-w-0">
-                    <ContactAvatar avatarUrl={contact.avatar_url} name={name} size="sm" />
+                    <PersonAvatar avatarUrl={person.avatar_url} name={name} size="sm" />
                     <div className="min-w-0">
                       <div className="flex items-center gap-1.5 min-w-0">
                         <Link
-                          href={`/contacts/${contact.id}`}
+                          href={`/people/${person.id}`}
                           className={`text-sm font-medium text-stone-900 dark:text-stone-100 hover:text-teal-700 dark:hover:text-teal-400 truncate block ${
-                            contact.priority_level === ARCHIVED_PRIORITY ? ARCHIVED_OPACITY_CLASS : ""
+                            person.priority_level === ARCHIVED_PRIORITY ? ARCHIVED_OPACITY_CLASS : ""
                           }`}
                         >
                           {name}
                         </Link>
-                        {contact.priority_level === ARCHIVED_PRIORITY && <ArchivedChip />}
+                        {person.priority_level === ARCHIVED_PRIORITY && <ArchivedChip />}
                       </div>
                       <div className="flex items-center gap-1.5">
                         {primaryEmail && (
                           <p className={`text-xs text-stone-400 dark:text-stone-500 truncate ${
-                            contact.priority_level === ARCHIVED_PRIORITY ? ARCHIVED_OPACITY_CLASS : ""
+                            person.priority_level === ARCHIVED_PRIORITY ? ARCHIVED_OPACITY_CLASS : ""
                           }`}>{primaryEmail}</p>
                         )}
                         <PlatformIcons
-                          emails={contact.emails}
-                          telegram={contact.telegram_username}
-                          twitter={contact.twitter_handle}
+                          emails={person.emails}
+                          telegram={person.telegram_username}
+                          twitter={person.twitter_handle}
                         />
                       </div>
                     </div>
@@ -291,12 +291,12 @@ function ContactsPageContent() {
 
                   {/* Company */}
                   <div className={`text-xs text-stone-600 dark:text-stone-300 truncate flex items-center gap-1.5 ${
-                    contact.priority_level === ARCHIVED_PRIORITY ? ARCHIVED_OPACITY_CLASS : ""
+                    person.priority_level === ARCHIVED_PRIORITY ? ARCHIVED_OPACITY_CLASS : ""
                   }`}>
-                    {contact.company ? (
+                    {person.company ? (
                       <>
-                        <CompanyFavicon emails={contact.emails} size="w-3.5 h-3.5" className="shrink-0" />
-                        <span className="truncate">{contact.company}</span>
+                        <CompanyFavicon emails={person.emails} size="w-3.5 h-3.5" className="shrink-0" />
+                        <span className="truncate">{person.company}</span>
                       </>
                     ) : (
                       <span className="text-stone-300 dark:text-stone-600">&mdash;</span>
@@ -305,22 +305,22 @@ function ContactsPageContent() {
 
                   {/* Score */}
                   <div className="text-center">
-                    <ScoreNumberBadge score={contact.relationship_score} />
+                    <ScoreNumberBadge score={person.relationship_score} />
                   </div>
 
                   {/* Priority */}
                   <div className="text-center">
-                    <PriorityBadge level={contact.priority_level} />
+                    <PriorityBadge level={person.priority_level} />
                   </div>
 
                   {/* Activity count */}
                   <div className="text-right font-mono-data text-xs text-stone-500 dark:text-stone-400">
-                    {contact.interaction_count ?? 0}
+                    {person.interaction_count ?? 0}
                   </div>
 
                   {/* Last interaction */}
                   <div className="text-right">
-                    <DaysAgo dateStr={contact.last_interaction_at} />
+                    <DaysAgo dateStr={person.last_interaction_at} />
                   </div>
                 </div>
               );
@@ -328,36 +328,36 @@ function ContactsPageContent() {
 
             {/* Mobile card list — visible only on < lg screens */}
             <div className="lg:hidden divide-y divide-stone-100 dark:divide-stone-800">
-              {contacts.map((contact) => {
+              {people.map((person) => {
                 const name =
-                  contact.full_name ??
-                  ([contact.given_name, contact.family_name].filter(Boolean).join(" ") || "Unnamed");
+                  person.full_name ??
+                  ([person.given_name, person.family_name].filter(Boolean).join(" ") || "Unnamed");
                 return (
                   <Link
-                    key={contact.id}
-                    href={`/contacts/${contact.id}`}
+                    key={person.id}
+                    href={`/people/${person.id}`}
                     className="card-hover flex items-center gap-3 px-4 py-3 hover:bg-stone-50 dark:hover:bg-stone-800/50 transition-colors"
                   >
-                    <ContactAvatar avatarUrl={contact.avatar_url} name={name} size="sm" />
+                    <PersonAvatar avatarUrl={person.avatar_url} name={name} size="sm" />
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2">
                         <p className={`text-sm font-medium text-stone-900 dark:text-stone-100 truncate ${
-                          contact.priority_level === ARCHIVED_PRIORITY ? ARCHIVED_OPACITY_CLASS : ""
+                          person.priority_level === ARCHIVED_PRIORITY ? ARCHIVED_OPACITY_CLASS : ""
                         }`}>
                           {name}
                         </p>
-                        {contact.priority_level === ARCHIVED_PRIORITY && <ArchivedChip />}
-                        <ScoreNumberBadge score={contact.relationship_score} />
+                        {person.priority_level === ARCHIVED_PRIORITY && <ArchivedChip />}
+                        <ScoreNumberBadge score={person.relationship_score} />
                       </div>
                       <p className={`text-xs text-stone-500 dark:text-stone-400 truncate ${
-                        contact.priority_level === ARCHIVED_PRIORITY ? ARCHIVED_OPACITY_CLASS : ""
+                        person.priority_level === ARCHIVED_PRIORITY ? ARCHIVED_OPACITY_CLASS : ""
                       }`}>
-                        {[contact.title, contact.company].filter(Boolean).join(" at ") || contact.emails?.[0] || ""}
+                        {[person.title, person.company].filter(Boolean).join(" at ") || person.emails?.[0] || ""}
                       </p>
                     </div>
-                    {contact.last_interaction_at && (
+                    {person.last_interaction_at && (
                       <span className="text-[11px] text-stone-400 dark:text-stone-500 shrink-0">
-                        {formatDistanceToNow(new Date(contact.last_interaction_at), { addSuffix: true })}
+                        {formatDistanceToNow(new Date(person.last_interaction_at), { addSuffix: true })}
                       </span>
                     )}
                   </Link>
@@ -384,20 +384,20 @@ function ContactsPageContent() {
             selectedCount={selectedIds.size}
             allTags={allTags}
             isPending={isPending}
-            onAddTag={(tag) => bulkUpdate.mutate({ contact_ids: selectedArray, add_tags: [tag] })}
-            onRemoveTag={(tag) => bulkUpdate.mutate({ contact_ids: selectedArray, remove_tags: [tag] })}
-            onSetPriority={(level) => bulkUpdate.mutate({ contact_ids: selectedArray, priority_level: level })}
-            onSetCompany={(company) => bulkUpdate.mutate({ contact_ids: selectedArray, company })}
-            onArchive={() => bulkUpdate.mutate({ contact_ids: selectedArray, priority_level: ARCHIVED_PRIORITY })}
+            onAddTag={(tag) => bulkUpdate.mutate({ person_ids: selectedArray, add_tags: [tag] })}
+            onRemoveTag={(tag) => bulkUpdate.mutate({ person_ids: selectedArray, remove_tags: [tag] })}
+            onSetPriority={(level) => bulkUpdate.mutate({ person_ids: selectedArray, priority_level: level })}
+            onSetCompany={(company) => bulkUpdate.mutate({ person_ids: selectedArray, company })}
+            onArchive={() => bulkUpdate.mutate({ person_ids: selectedArray, priority_level: ARCHIVED_PRIORITY })}
             onDelete={() => {
               // eslint-disable-next-line no-alert -- native confirm before destructive bulk delete
-              if (confirm(`Delete ${selectedArray.length} contact${selectedArray.length > 1 ? "s" : ""}? This cannot be undone.`)) {
+              if (confirm(`Delete ${selectedArray.length} person${selectedArray.length > 1 ? "s" : ""}? This cannot be undone.`)) {
                 deleteMutation.mutate(selectedArray);
               }
             }}
             onMerge={() => {
               // eslint-disable-next-line no-alert -- native confirm before destructive bulk merge
-              if (selectedArray.length >= 2 && confirm(`Merge ${selectedArray.length} contacts into one? This cannot be undone.`)) {
+              if (selectedArray.length >= 2 && confirm(`Merge ${selectedArray.length} people into one? This cannot be undone.`)) {
                 mergeMutation.mutate(selectedArray);
               }
             }}
@@ -409,7 +409,7 @@ function ContactsPageContent() {
   );
 }
 
-function ContactsPageLoading() {
+function PeoplePageLoading() {
   return (
     <div className="min-h-screen bg-stone-50 dark:bg-stone-950">
       <div className="max-w-6xl mx-auto px-4 py-8">
@@ -427,10 +427,10 @@ function ContactsPageLoading() {
   );
 }
 
-export default function ContactsPage() {
+export default function PeoplePage() {
   return (
-    <Suspense fallback={<ContactsPageLoading />}>
-      <ContactsPageContent />
+    <Suspense fallback={<PeoplePageLoading />}>
+      <PeoplePageContent />
     </Suspense>
   );
 }
